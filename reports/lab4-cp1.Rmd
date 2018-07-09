@@ -36,7 +36,8 @@ programming_languages <- subset(users_data_from_github, !(file_extension %in% no
 
 ```
 
-### 2. Popularidade
+### 2. Popularidade na amostra
+
 ```{r}
 
 ```

@@ -1,0 +1,42 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+### 1. Os Dados
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GGally)
+library(here)
+library(plotly)
+theme_set(theme_bw())
+```
+
+
+```{r}
+users_data_from_github = read_csv(here("data/github-users-committing-filetypes.csv"),
+                col_types = cols(
+                      .default = col_double(),
+                      file_extension = col_character(),
+                      month_day = col_integer(),
+                      the_month = col_integer(),
+                      the_year = col_integer(),
+                      users = col_integer()
+                    ))
+
+## Algumas extensoes nao sao linguagens de programacao
+unique(programming_languages$file_extension)
+
+non_programming_languages <- c("pdf", "md", "html", "txt", "json", "xml", "css", "yml", "scss", "jpg",
+                   "lock", "png", "gradle", "config", "ico", "gif", "svg", "csproj", "rst",
+                   "map", "ttf", "yaml", "pbxproj", "less", "woff", "eot")
+
+programming_languages <- subset(users_data_from_github, !(file_extension %in% non_programming_languages))
+
+```
+
+### 2. Popularidade
+```{r}
+
+```

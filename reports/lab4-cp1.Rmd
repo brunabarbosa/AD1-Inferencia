@@ -1,6 +1,8 @@
 ---
 title: "R Notebook"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ### 1. Os Dados
@@ -10,11 +12,14 @@ library(tidyverse)
 library(GGally)
 library(here)
 library(plotly)
+library(ggplot2)
+library(ggExtra)
+library(reshape2)
 theme_set(theme_bw())
 ```
 
 
-```{r}
+```{r echo=TRUE}
 users_data_from_github = read_csv(here("data/github-users-committing-filetypes.csv"),
                 col_types = cols(
                       .default = col_double(),
@@ -31,16 +36,59 @@ non_programming_languages <- c("pdf", "md", "html", "txt", "json", "xml", "css",
 
 programming_languages <- subset(users_data_from_github, !(file_extension %in% non_programming_languages))
 
+programming_languages_sorted <- programming_languages %>% 
+  arrange(file_extension, the_year, the_month, month_day)
+
 ##Linguagens de programacao
-unique(programming_languages$file_extension)
+unique(programming_languages_sorted$file_extension)
+
+programming_languages_sorted <- programming_languages_sorted %>% 
+  mutate(date_formated = paste(the_year, the_month, month_day, sep="-"))
 
 ```
 
 ### 2. Popularidade na amostra
 
-```{r}
-programming_languages_sorted <- programming_languages %>% 
-  arrange(file_extension, the_year, the_month, month_day)
+#### 2.2 JavaScript
 
+```{r echo=TRUE}
+js <- programming_languages_sorted %>% 
+  filter(file_extension == "js") %>% 
+  group_by(file_extension, the_year, the_month) %>%
+  summarise(monthly_users = sum(users)) 
+  
+
+sp <- ggplot(js, aes(x = the_month,y = monthly_users, color = as.factor(js$the_year))) +
+    geom_point(size=1) + xlab("Month") + ylab("Users") + 
+    geom_line() + 
+    ggtitle("Java Script") 
+
+sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
+
+ggplotly(sp)%>% 
+  layout(showlegend = FALSE)
 
 ```
+
+
+#### 2.2 Go
+
+```{r echo=TRUE}
+go <- programming_languages_sorted %>% 
+  filter(file_extension == "go") %>% 
+  group_by(file_extension, the_year, the_month) %>%
+  summarise(monthly_users = sum(users)) 
+  
+
+sp <- ggplot(go, aes(x = the_month,y = monthly_users, color = as.factor(js$the_year))) +
+    geom_line() + 
+    geom_point(size=1) + xlab("Month") + ylab("Users") + 
+    ggtitle("Go") 
+
+sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
+
+ggplotly(sp)%>% 
+  layout(showlegend = FALSE)
+
+```
+

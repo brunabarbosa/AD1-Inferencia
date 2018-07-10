@@ -25,19 +25,22 @@ users_data_from_github = read_csv(here("data/github-users-committing-filetypes.c
                       users = col_integer()
                     ))
 
-## Algumas extensoes nao sao linguagens de programacao
-unique(programming_languages$file_extension)
-
 non_programming_languages <- c("pdf", "md", "html", "txt", "json", "xml", "css", "yml", "scss", "jpg",
                    "lock", "png", "gradle", "config", "ico", "gif", "svg", "csproj", "rst",
                    "map", "ttf", "yaml", "pbxproj", "less", "woff", "eot")
 
 programming_languages <- subset(users_data_from_github, !(file_extension %in% non_programming_languages))
 
+##Linguagens de programacao
+unique(programming_languages$file_extension)
+
 ```
 
 ### 2. Popularidade na amostra
 
 ```{r}
+programming_languages_sorted <- programming_languages %>% 
+  arrange(file_extension, the_year, the_month, month_day)
+
 
 ```

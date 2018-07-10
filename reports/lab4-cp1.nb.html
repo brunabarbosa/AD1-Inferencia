@@ -182,10 +182,22 @@ $(document).ready(function () {
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMgQWxndW1hcyBleHRlbnNvZXMgbmFvIHNhbyBsaW5ndWFnZW5zIGRlIHByb2dyYW1hY2FvXG51bmlxdWUocHJvZ3JhbW1pbmdfbGFuZ3VhZ2VzJGZpbGVfZXh0ZW5zaW9uKVxuXG5gYGAifQ== -->
-<pre class="r"><code>## Algumas extensoes nao sao linguagens de programacao
-unique(programming_languages$file_extension)
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudXNlcnNfZGF0YV9mcm9tX2dpdGh1YiA9IHJlYWRfY3N2KGhlcmUoXCJkYXRhL2dpdGh1Yi11c2Vycy1jb21taXR0aW5nLWZpbGV0eXBlcy5jc3ZcIiksXG4gICAgICAgICAgICAgICAgY29sX3R5cGVzID0gY29scyhcbiAgICAgICAgICAgICAgICAgICAgICAuZGVmYXVsdCA9IGNvbF9kb3VibGUoKSxcbiAgICAgICAgICAgICAgICAgICAgICBmaWxlX2V4dGVuc2lvbiA9IGNvbF9jaGFyYWN0ZXIoKSxcbiAgICAgICAgICAgICAgICAgICAgICBtb250aF9kYXkgPSBjb2xfaW50ZWdlcigpLFxuICAgICAgICAgICAgICAgICAgICAgIHRoZV9tb250aCA9IGNvbF9pbnRlZ2VyKCksXG4gICAgICAgICAgICAgICAgICAgICAgdGhlX3llYXIgPSBjb2xfaW50ZWdlcigpLFxuICAgICAgICAgICAgICAgICAgICAgIHVzZXJzID0gY29sX2ludGVnZXIoKVxuICAgICAgICAgICAgICAgICAgICApKVxubm9uX3Byb2dyYW1taW5nX2xhbmd1YWdlcyA8LSBjKFwicGRmXCIsIFwibWRcIiwgXCJodG1sXCIsIFwidHh0XCIsIFwianNvblwiLCBcInhtbFwiLCBcImNzc1wiLCBcInltbFwiLCBcInNjc3NcIiwgXCJqcGdcIixcbiAgICAgICAgICAgICAgICAgICBcImxvY2tcIiwgXCJwbmdcIiwgXCJncmFkbGVcIiwgXCJjb25maWdcIiwgXCJpY29cIiwgXCJnaWZcIiwgXCJzdmdcIiwgXCJjc3Byb2pcIiwgXCJyc3RcIixcbiAgICAgICAgICAgICAgICAgICBcIm1hcFwiLCBcInR0ZlwiLCBcInlhbWxcIiwgXCJwYnhwcm9qXCIsIFwibGVzc1wiLCBcIndvZmZcIiwgXCJlb3RcIilcbnByb2dyYW1taW5nX2xhbmd1YWdlcyA8LSBzdWJzZXQodXNlcnNfZGF0YV9mcm9tX2dpdGh1YiwgIShmaWxlX2V4dGVuc2lvbiAlaW4lIG5vbl9wcm9ncmFtbWluZ19sYW5ndWFnZXMpKVxuIyNMaW5ndWFnZW5zIGRlIHByb2dyYW1hY2FvXG51bmlxdWUocHJvZ3JhbW1pbmdfbGFuZ3VhZ2VzJGZpbGVfZXh0ZW5zaW9uKVxuYGBgIn0= -->
+<pre class="r"><code>users_data_from_github = read_csv(here(&quot;data/github-users-committing-filetypes.csv&quot;),
+                col_types = cols(
+                      .default = col_double(),
+                      file_extension = col_character(),
+                      month_day = col_integer(),
+                      the_month = col_integer(),
+                      the_year = col_integer(),
+                      users = col_integer()
+                    ))
+non_programming_languages &lt;- c(&quot;pdf&quot;, &quot;md&quot;, &quot;html&quot;, &quot;txt&quot;, &quot;json&quot;, &quot;xml&quot;, &quot;css&quot;, &quot;yml&quot;, &quot;scss&quot;, &quot;jpg&quot;,
+                   &quot;lock&quot;, &quot;png&quot;, &quot;gradle&quot;, &quot;config&quot;, &quot;ico&quot;, &quot;gif&quot;, &quot;svg&quot;, &quot;csproj&quot;, &quot;rst&quot;,
+                   &quot;map&quot;, &quot;ttf&quot;, &quot;yaml&quot;, &quot;pbxproj&quot;, &quot;less&quot;, &quot;woff&quot;, &quot;eot&quot;)
+programming_languages &lt;- subset(users_data_from_github, !(file_extension %in% non_programming_languages))
+##Linguagens de programacao
+unique(programming_languages$file_extension)</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-output-begin eyJkYXRhIjoiIFsxXSBcImpzXCIgICAgXCJweVwiICAgIFwiamF2YVwiICBcImhcIiAgICAgXCJwaHBcIiAgIFwiY3BwXCIgICBcInNoXCIgICAgXCJyYlwiICAgIFwiY1wiICAgICBcImNzXCIgICAgXCJnb1wiICAgXG5bMTJdIFwidHNcIiAgICBcIm1cIiAgICAgXCJzd2lmdFwiIFwiY2NcIiAgICBcInNxbFwiICBcbiJ9 -->
 <pre><code> [1] &quot;js&quot;    &quot;py&quot;    &quot;java&quot;  &quot;h&quot;     &quot;php&quot;   &quot;cpp&quot;   &quot;sh&quot;    &quot;rb&quot;    &quot;c&quot;     &quot;cs&quot;    &quot;go&quot;   
@@ -198,10 +210,20 @@ unique(programming_languages$file_extension)
 <h3>2. Popularidade na amostra</h3>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYSA8LSBwcm9ncmFtbWluZ19sYW5ndWFnZXMgJT4lIFxuICBncm91cF9ieShmaWxlX2V4dGVuc2lvbikgJT4lIFxuICBhcnJhbmdlKHllYXIpXG5cbmBgYCJ9 -->
+<pre class="r"><code>a &lt;- programming_languages %&gt;% 
+  group_by(file_extension) %&gt;% 
+  arrange(year)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gYXJyYW5nZV9pbXBsKC5kYXRhLCBkb3RzKSA6IFxuICBFdmFsdWF0aW9uIGVycm9yOiBvYmplY3QgJ3llYXInIG5vdCBmb3VuZC5cbiJ9 -->
+<pre><code>Error in arrange_impl(.data, dots) : 
+  Evaluation error: object 'year' not found.</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQojIyMgMS4gT3MgRGFkb3MNCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQ0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFKQ0KbGlicmFyeSh0aWR5dmVyc2UpDQpsaWJyYXJ5KEdHYWxseSkNCmxpYnJhcnkoaGVyZSkNCmxpYnJhcnkocGxvdGx5KQ0KdGhlbWVfc2V0KHRoZW1lX2J3KCkpDQpgYGANCg0KDQpgYGB7cn0NCnVzZXJzX2RhdGFfZnJvbV9naXRodWIgPSByZWFkX2NzdihoZXJlKCJkYXRhL2dpdGh1Yi11c2Vycy1jb21taXR0aW5nLWZpbGV0eXBlcy5jc3YiKSwNCiAgICAgICAgICAgICAgICBjb2xfdHlwZXMgPSBjb2xzKA0KICAgICAgICAgICAgICAgICAgICAgIC5kZWZhdWx0ID0gY29sX2RvdWJsZSgpLA0KICAgICAgICAgICAgICAgICAgICAgIGZpbGVfZXh0ZW5zaW9uID0gY29sX2NoYXJhY3RlcigpLA0KICAgICAgICAgICAgICAgICAgICAgIG1vbnRoX2RheSA9IGNvbF9pbnRlZ2VyKCksDQogICAgICAgICAgICAgICAgICAgICAgdGhlX21vbnRoID0gY29sX2ludGVnZXIoKSwNCiAgICAgICAgICAgICAgICAgICAgICB0aGVfeWVhciA9IGNvbF9pbnRlZ2VyKCksDQogICAgICAgICAgICAgICAgICAgICAgdXNlcnMgPSBjb2xfaW50ZWdlcigpDQogICAgICAgICAgICAgICAgICAgICkpDQoNCiMjIEFsZ3VtYXMgZXh0ZW5zb2VzIG5hbyBzYW8gbGluZ3VhZ2VucyBkZSBwcm9ncmFtYWNhbw0KdW5pcXVlKHByb2dyYW1taW5nX2xhbmd1YWdlcyRmaWxlX2V4dGVuc2lvbikNCg0Kbm9uX3Byb2dyYW1taW5nX2xhbmd1YWdlcyA8LSBjKCJwZGYiLCAibWQiLCAiaHRtbCIsICJ0eHQiLCAianNvbiIsICJ4bWwiLCAiY3NzIiwgInltbCIsICJzY3NzIiwgImpwZyIsDQogICAgICAgICAgICAgICAgICAgImxvY2siLCAicG5nIiwgImdyYWRsZSIsICJjb25maWciLCAiaWNvIiwgImdpZiIsICJzdmciLCAiY3Nwcm9qIiwgInJzdCIsDQogICAgICAgICAgICAgICAgICAgIm1hcCIsICJ0dGYiLCAieWFtbCIsICJwYnhwcm9qIiwgImxlc3MiLCAid29mZiIsICJlb3QiKQ0KDQpwcm9ncmFtbWluZ19sYW5ndWFnZXMgPC0gc3Vic2V0KHVzZXJzX2RhdGFfZnJvbV9naXRodWIsICEoZmlsZV9leHRlbnNpb24gJWluJSBub25fcHJvZ3JhbW1pbmdfbGFuZ3VhZ2VzKSkNCg0KYGBgDQoNCiMjIyAyLiBQb3B1bGFyaWRhZGUgbmEgYW1vc3RyYQ0KDQpgYGB7cn0NCg0KYGBgDQo=</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIlIgTm90ZWJvb2siDQpvdXRwdXQ6IGh0bWxfbm90ZWJvb2sNCi0tLQ0KDQojIyMgMS4gT3MgRGFkb3MNCmBgYHtyIHNldHVwLCBpbmNsdWRlPUZBTFNFfQ0Ka25pdHI6Om9wdHNfY2h1bmskc2V0KGVjaG8gPSBUUlVFKQ0KbGlicmFyeSh0aWR5dmVyc2UpDQpsaWJyYXJ5KEdHYWxseSkNCmxpYnJhcnkoaGVyZSkNCmxpYnJhcnkocGxvdGx5KQ0KdGhlbWVfc2V0KHRoZW1lX2J3KCkpDQpgYGANCg0KDQpgYGB7cn0NCnVzZXJzX2RhdGFfZnJvbV9naXRodWIgPSByZWFkX2NzdihoZXJlKCJkYXRhL2dpdGh1Yi11c2Vycy1jb21taXR0aW5nLWZpbGV0eXBlcy5jc3YiKSwNCiAgICAgICAgICAgICAgICBjb2xfdHlwZXMgPSBjb2xzKA0KICAgICAgICAgICAgICAgICAgICAgIC5kZWZhdWx0ID0gY29sX2RvdWJsZSgpLA0KICAgICAgICAgICAgICAgICAgICAgIGZpbGVfZXh0ZW5zaW9uID0gY29sX2NoYXJhY3RlcigpLA0KICAgICAgICAgICAgICAgICAgICAgIG1vbnRoX2RheSA9IGNvbF9pbnRlZ2VyKCksDQogICAgICAgICAgICAgICAgICAgICAgdGhlX21vbnRoID0gY29sX2ludGVnZXIoKSwNCiAgICAgICAgICAgICAgICAgICAgICB0aGVfeWVhciA9IGNvbF9pbnRlZ2VyKCksDQogICAgICAgICAgICAgICAgICAgICAgdXNlcnMgPSBjb2xfaW50ZWdlcigpDQogICAgICAgICAgICAgICAgICAgICkpDQoNCm5vbl9wcm9ncmFtbWluZ19sYW5ndWFnZXMgPC0gYygicGRmIiwgIm1kIiwgImh0bWwiLCAidHh0IiwgImpzb24iLCAieG1sIiwgImNzcyIsICJ5bWwiLCAic2NzcyIsICJqcGciLA0KICAgICAgICAgICAgICAgICAgICJsb2NrIiwgInBuZyIsICJncmFkbGUiLCAiY29uZmlnIiwgImljbyIsICJnaWYiLCAic3ZnIiwgImNzcHJvaiIsICJyc3QiLA0KICAgICAgICAgICAgICAgICAgICJtYXAiLCAidHRmIiwgInlhbWwiLCAicGJ4cHJvaiIsICJsZXNzIiwgIndvZmYiLCAiZW90IikNCg0KcHJvZ3JhbW1pbmdfbGFuZ3VhZ2VzIDwtIHN1YnNldCh1c2Vyc19kYXRhX2Zyb21fZ2l0aHViLCAhKGZpbGVfZXh0ZW5zaW9uICVpbiUgbm9uX3Byb2dyYW1taW5nX2xhbmd1YWdlcykpDQoNCiMjTGluZ3VhZ2VucyBkZSBwcm9ncmFtYWNhbw0KdW5pcXVlKHByb2dyYW1taW5nX2xhbmd1YWdlcyRmaWxlX2V4dGVuc2lvbikNCg0KYGBgDQoNCiMjIyAyLiBQb3B1bGFyaWRhZGUgbmEgYW1vc3RyYQ0KDQpgYGB7cn0NCnByb2dyYW1taW5nX2xhbmd1YWdlc19zb3J0ZWQgPC0gcHJvZ3JhbW1pbmdfbGFuZ3VhZ2VzICU+JSANCiAgYXJyYW5nZShmaWxlX2V4dGVuc2lvbiwgdGhlX3llYXIsIHRoZV9tb250aCwgbW9udGhfZGF5KQ0KDQoNCmBgYA0K</div>
 
 
 

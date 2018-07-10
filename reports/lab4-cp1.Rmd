@@ -61,7 +61,8 @@ js <- programming_languages_sorted %>%
 sp <- ggplot(js, aes(x = the_month,y = monthly_users, color = as.factor(js$the_year))) +
     geom_point(size=1) + xlab("Month") + ylab("Users") + 
     geom_line() + 
-    ggtitle("Java Script") 
+    ggtitle("Java Script") +
+    geom_hline(aes(yintercept=median(monthly_users)),colour="#315b7d", linetype="dashed")
 
 sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
 
@@ -83,7 +84,8 @@ go <- programming_languages_sorted %>%
 sp <- ggplot(go, aes(x = the_month,y = monthly_users, color = as.factor(js$the_year))) +
     geom_line() + 
     geom_point(size=1) + xlab("Month") + ylab("Users") + 
-    ggtitle("Go") 
+    ggtitle("Go") +
+    geom_hline(aes(yintercept=median(monthly_users)),colour="#315b7d", linetype="dashed")
 
 sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
 

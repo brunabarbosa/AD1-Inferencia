@@ -13,13 +13,14 @@ library(GGally)
 library(here)
 library(plotly)
 library(ggplot2)
-library(ggExtra)
 library(reshape2)
+library(chron)
+
 theme_set(theme_bw())
 ```
 
 
-```{r echo=TRUE}
+```{r echo=TRUE, message=FALSE, warning=FALSE, r echo=TRUE}
 users_data_from_github = read_csv(here("data/github-users-committing-filetypes.csv"),
                 col_types = cols(
                       .default = col_double(),
@@ -43,7 +44,8 @@ programming_languages_sorted <- programming_languages %>%
 unique(programming_languages_sorted$file_extension)
 
 programming_languages_sorted <- programming_languages_sorted %>% 
-  mutate(date_formated = paste(the_year, the_month, month_day, sep="-"))
+  mutate(date_formated = paste(the_year, the_month, month_day, sep="-")) %>% 
+  mutate(is_weekend = is.weekend(date_formated))
 
 ```
 
@@ -58,19 +60,41 @@ js <- programming_languages_sorted %>%
   summarise(monthly_users = sum(users)) 
   
 
-sp <- ggplot(js, aes(x = the_month,y = monthly_users, color = as.factor(js$the_year))) +
+year <- as.factor(js$the_year)
+sp <- ggplot(js, aes(x = the_month,y = monthly_users, color = year)) +
     geom_point(size=1) + xlab("Month") + ylab("Users") + 
     geom_line() + 
     ggtitle("Java Script") +
     geom_hline(aes(yintercept=median(monthly_users)),colour="#315b7d", linetype="dashed")
 
-sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
+#sp <- sp + facet_grid(rows = vars(js$the_year)) + theme(legend.position="none")
+
+ggplotly(sp)
+
+```
+
+
+
+```{r echo=TRUE}
+js_fds <- programming_languages_sorted %>% 
+  filter(file_extension == "js") %>% 
+  filter(is_weekend == TRUE) %>% 
+  group_by(file_extension, the_year, the_month) %>%
+  summarise(monthly_users = sum(users)) 
+  
+
+sp <- ggplot(js_fds, aes(x = the_month,y = monthly_users, color = year)) +
+    geom_point(size=1) + xlab("Month") + ylab("Users") + 
+    geom_line() + 
+    ggtitle("Java Script") +
+    geom_hline(aes(yintercept=median(monthly_users)),colour="#315b7d", linetype="dashed")
+
+#sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
 
 ggplotly(sp)%>% 
   layout(showlegend = FALSE)
 
 ```
-
 
 #### 2.2 Go
 
@@ -94,3 +118,5 @@ ggplotly(sp)%>%
 
 ```
 
+
+### 3.Bootstrap

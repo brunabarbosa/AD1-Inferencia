@@ -7,7 +7,7 @@ output:
 
 ### 1. Os Dados
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 library(tidyverse)
 library(GGally)
 library(here)
@@ -15,12 +15,13 @@ library(plotly)
 library(ggplot2)
 library(reshape2)
 library(chron)
+library(boot)
 
 theme_set(theme_bw())
 ```
 
 
-```{r echo=TRUE, message=FALSE, warning=FALSE, r echo=TRUE}
+```{r echo=TRUE, message=FALSE, warning=FALSE}
 users_data_from_github = read_csv(here("data/github-users-committing-filetypes.csv"),
                 col_types = cols(
                       .default = col_double(),
@@ -49,7 +50,14 @@ programming_languages_sorted <- programming_languages_sorted %>%
 
 ```
 
-### 2. Popularidade na amostra
+### 2. Popularidade nas amostras das linguagens escolhidas
+
+Os dados colhidos tem queda de popularidade das duas linguagens durante as ferias americanas (summer vacation). Neste periodo quase todos os estudantes tem uma produtividade reduzida, isso
+foi refletido na queda acentuada da popularidade das linguagens go e java script.
+
+É possivel que esses dados nao contenham informaçoes sobre popularidade de linguagens 
+em empresas, pois o esperado é que a quantidade de commits nao caiam tao acentuadamente durante o summer
+vacation.
 
 #### 2.2 JavaScript
 
@@ -70,30 +78,17 @@ sp <- ggplot(js, aes(x = the_month,y = monthly_users, color = year)) +
 #sp <- sp + facet_grid(rows = vars(js$the_year)) + theme(legend.position="none")
 
 ggplotly(sp)
-
 ```
 
-
-
+No grafico abaixo podemos notar que os dados da amostra sao enviesados para a direita.
 ```{r echo=TRUE}
-js_fds <- programming_languages_sorted %>% 
-  filter(file_extension == "js") %>% 
-  filter(is_weekend == TRUE) %>% 
-  group_by(file_extension, the_year, the_month) %>%
-  summarise(monthly_users = sum(users)) 
-  
+js <- programming_languages_sorted %>% 
+  filter(file_extension == "js") 
 
-sp <- ggplot(js_fds, aes(x = the_month,y = monthly_users, color = year)) +
-    geom_point(size=1) + xlab("Month") + ylab("Users") + 
-    geom_line() + 
-    ggtitle("Java Script") +
-    geom_hline(aes(yintercept=median(monthly_users)),colour="#315b7d", linetype="dashed")
-
-#sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
-
-ggplotly(sp)%>% 
-  layout(showlegend = FALSE)
-
+js %>% 
+  ggplot(aes(x = users)) +
+  stat_density(aes(group = file_extension, color = "#4c0000"),position="identity",geom="line") +
+  ggtitle("Densidade na Amostra - Java Script") 
 ```
 
 #### 2.2 Go
@@ -104,19 +99,234 @@ go <- programming_languages_sorted %>%
   group_by(file_extension, the_year, the_month) %>%
   summarise(monthly_users = sum(users)) 
   
-
-sp <- ggplot(go, aes(x = the_month,y = monthly_users, color = as.factor(js$the_year))) +
+year <- as.factor(go$the_year)
+sp <- ggplot(go, aes(x = the_month,y = monthly_users, color = year)) +
     geom_line() + 
     geom_point(size=1) + xlab("Month") + ylab("Users") + 
     ggtitle("Go") +
     geom_hline(aes(yintercept=median(monthly_users)),colour="#315b7d", linetype="dashed")
 
-sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
+#sp <- sp + facet_grid(rows = vars(the_year)) + theme(legend.position="none")
 
-ggplotly(sp)%>% 
-  layout(showlegend = FALSE)
-
+ggplotly(sp)
 ```
 
 
+No grafico abaixo podemos notar que os dados da amostra tambem sao enviesados para a direita.
+```{r echo=TRUE}
+go <- programming_languages_sorted %>% 
+  filter(file_extension == "go")
+
+go %>% 
+  ggplot(aes(x = users)) +
+  stat_density(aes(group = file_extension, color = "#315b7d"),position="identity",geom="line") +
+  facet_wrap(~ file_extension) + 
+  ggtitle("Densidade na Amostra - Go")
+```
+
 ### 3.Bootstrap
+
+#### 3.1 Para cada uma delas, há uma diferença significativa na sua popularidade durante a semana e durante o fim de semana? Essa diferença é grande?
+
+##### 3.1.1 JAVA SCRIPT
+*Utilizando bootstrap:* Diferença na popularidade da linguagem Java Script durante a semana
+e o fim de semana.
+```{r echo=TRUE}
+set.seed(1)
+
+js_weekend <- programming_languages_sorted %>% 
+  filter(file_extension == "js") %>% 
+      filter(is_weekend == TRUE)
+
+funcao_bootstrap <- function(dado, indices){
+    d = dado %>% 
+        slice(indices) %>% # slice(x, c(1, 4, 5)) retorna um vetor com os elementos nos índices 1, 4 e 5 de x
+        pull(users)         # tempo_no_site é o nome da variável que nos interessa
+    return(mean(d))
+}
+
+bootstraps <- boot(data = js_weekend, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+#glimpse(bootstraps$t)
+
+boot.ci(bootstraps, conf = 0.95, type = "bca")
+```
+
+
+*Utilizando bootstrap:* Diferença na popularidade da linguagem Java Script o fim de semana.
+```{r echo=TRUE}
+js_weekday <- programming_languages_sorted %>% 
+  filter(file_extension == "js") %>% 
+      filter(is_weekend == FALSE)
+
+bootstraps <- boot(data = js_weekday, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+boot.ci(bootstraps, conf = 0.95, type = "bca")
+```
+
+Como os intervalos sao disjuntos, a linguagem Java Script é em media mais popular durante os dias da semana.
+
+##### 3.1.2 GO
+
+*Utilizando bootstrap:* Diferença na popularidade da linguagem Go durante a semana
+e o fim de semana.
+```{r echo=TRUE}
+go_weekend <- programming_languages_sorted %>% 
+  filter(file_extension == "go") %>% 
+      filter(is_weekend == TRUE)
+
+funcao_bootstrap <- function(dado, indices){
+    d = dado %>% 
+        slice(indices) %>% # slice(x, c(1, 4, 5)) retorna um vetor com os elementos nos índices 1, 4 e 5 de x
+        pull(users)         # tempo_no_site é o nome da variável que nos interessa
+    return(mean(d))
+}
+
+bootstraps <- boot(data = go_weekend, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+boot.ci(bootstraps, conf = 0.95, type = "bca")
+```
+
+*Utilizando bootstrap:* Diferença na popularidade da linguagem Go o fim de semana.
+```{r echo=TRUE}
+go_weekday <- programming_languages_sorted %>% 
+  filter(file_extension == "go") %>% 
+      filter(is_weekend == FALSE)
+
+bootstraps <- boot(data = go_weekday, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+boot.ci(bootstraps, conf = 0.95, type = "bca")
+```
+
+Como os intervalos sao disjuntos, a linguagem Go é, em media, mais popular durante os dias da semana.
+
+#### 3.2 Existe uma diferença significativa entre a popularidade das duas linguagens nos fins de semana? 
+
+*Media e mediana da amostra:*
+```{r echo=TRUE}
+amostra <- programming_languages_sorted %>% 
+  filter(file_extension %in% c("go", "js")) %>% 
+  group_by(is_weekend) %>%
+  select(users, is_weekend) %>% 
+  summarise_all(funs(mean, median))
+
+amostra
+
+```
+Na amostra, a popularidade das linguagens caem durante o fim de semana.
+
+*Utilizando bootstrap: Media da populacao no fim de semana*
+```{r echo=TRUE}
+set.seed(1)
+
+amostra_weekend <- programming_languages_sorted %>% 
+  filter(file_extension %in% c("js", "go")) %>% 
+  filter(is_weekend == TRUE)
+
+funcao_bootstrap <- function(dado, indices){
+    d = dado %>% 
+        slice(indices) %>% # slice(x, c(1, 4, 5)) retorna um vetor com os elementos nos índices 1, 4 e 5 de x
+        pull(users)         # tempo_no_site é o nome da variável que nos interessa
+    return(mean(d))
+}
+
+bootstraps <- boot(data = amostra_weekend, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+#glimpse(bootstraps$t)
+
+boot.ci(bootstraps, conf = 0.95, type = "bca")
+```
+
+*Utilizando bootstrap: Media da populacao nos dias uteis*
+```{r echo=TRUE}
+amostra_weekday <- programming_languages_sorted %>% 
+  filter(file_extension %in% c("js", "go")) %>% 
+  filter(is_weekend == FALSE)
+
+bootstraps <- boot(data = amostra_weekday, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+#glimpse(bootstraps$t)
+
+boot.ci(bootstraps, conf = 0.95, type = "bca")
+
+```
+
+Como os dois intervalos sao disjuntos, podemos concluir que as linguagens escolhidas, em media, sao mais
+populares durante dias de semana.
+
+#### 3.3 Ha diferenca entre a popularidade sexta e sabado? 
+
+Utilizando as duas linguagens escolhidas.
+
+```{r echo=TRUE}
+
+amostra <- programming_languages_sorted %>% 
+  mutate(day_of_week = day.of.week(the_year, the_month, month_day))
+
+sexta <- amostra %>% 
+  filter(file_extension %in% c("js", "go")) %>% 
+  filter(day_of_week == 5)
+
+sabado <- amostra %>% 
+  filter(file_extension %in% c("js", "go")) %>% 
+  filter(day_of_week == 6)
+
+
+bootstraps_sexta <- boot(data = sexta, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+bootstraps_sabado <- boot(data = sabado, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+boot.ci(bootstraps_sexta, conf = 0.95, type = "bca")
+boot.ci(bootstraps_sabado, conf = 0.95, type = "bca")
+
+```
+
+Como ha intercessão entre os intervalos,nao é possivel determinar a diferença de popularidade entre sexta e sabado.
+
+
+#### 3.4 Ha dirença substancial entre segunda e domingo?
+
+
+Utilizando as duas linguagens escolhidas.
+
+```{r echo=TRUE}
+
+segunda <- amostra %>% 
+  filter(file_extension %in% c("js", "go")) %>% 
+  filter(day_of_week == 1)
+
+domingo <- amostra %>% 
+  filter(file_extension %in% c("js", "go")) %>% 
+  filter(day_of_week == 0)
+
+
+bootstraps_segunda <- boot(data = segunda, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+bootstraps_domingo <- boot(data = domingo, 
+                   statistic = funcao_bootstrap, # <- referência para a função 
+                   R = 2000) # número de bootstraps
+
+boot.ci(bootstraps_segunda, conf = 0.95, type = "bca")
+boot.ci(bootstraps_domingo, conf = 0.95, type = "bca")
+
+```
+
+Como ha intercessão entre os intervalos,nao é possivel determinar a diferença de popularidade entre segunda e domingo.

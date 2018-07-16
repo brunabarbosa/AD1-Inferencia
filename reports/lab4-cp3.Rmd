@@ -1,7 +1,9 @@
 ---
 title: "R Notebook"
 author: "Bruna Barbosa"
-output: html_notebook
+output:
+  html_document:
+    df_print: paged
 ---
 
 ### 1.Dados
@@ -44,18 +46,124 @@ programming_languages_sorted <- programming_languages %>%
 unique(programming_languages_sorted$file_extension)
 
 programming_languages_sorted <- programming_languages_sorted %>% 
-  mutate(date_formated = paste(the_year, the_month, month_day, sep="-")) %>% 
-  mutate(is_weekend = wday(date_formated, label = FALSE, abbr = TRUE, ordered = FALSE))
+  mutate(date_formated = paste(the_year, the_month, month_day, sep="-"))
 
 ```
 ### 1. Linguagens mais recentes sao mais populares do que linguagens mais antigas?
 
   Nesta analise utilizaremos 2 grupos que contem 3 linguagens cada, o primeiro grupo com linguagens dos anos 90 e outro com linguagens que surgiram apartir do ano 2000.
   
-1. GRUPO 1 [1970-1990]: java, c e sql
-2. GRUPO 2 [2000-2018]: go, typescript e swift
+#### GRUPO 1 [1970-1990]: *java, c e sql*
+#### GRUPO 2 [2000-2018]: *go, typescript e swift*
+
+#### 1.1 Popularidade de linguagens na amostra
 
 ```{r}
 
+old_languages <- programming_languages_sorted %>% 
+                filter(file_extension %in% c('java', 'c', 'sql')) %>% 
+                group_by(the_year, the_month) %>%
+                summarise(monthly_users = sum(users))
+
+new_languages <- programming_languages_sorted %>% 
+                filter(file_extension %in% c('go', 'ts', 'swift')) %>% 
+                group_by(the_year, the_month) %>%
+                summarise(monthly_users = sum(users)) 
+
+year <- as.factor(old_languages$the_year)
+ol_sp <- ggplot(old_languages, aes(x = the_month,y = monthly_users, color = year)) +
+    geom_point(size=1) + xlab("Month") + ylab("Users") + 
+    geom_line() + 
+    ggtitle("Linguagens mais antigas") +
+    geom_hline(aes(yintercept=median(monthly_users)),colour="#315b7d", linetype="dashed")
+
+
+ggplotly(ol_sp)
+```
+
+```{r}
+year <- as.factor(new_languages$the_year)
+nl_sp <- ggplot(new_languages, aes(x = the_month,y = monthly_users, color = year)) +
+    geom_point(size=1) + xlab("Month") + ylab("Users") + 
+    geom_line() + 
+    ggtitle("Linguagens mais recentes") +
+    geom_hline(aes(yintercept=median(monthly_users)),colour="#315b7d", linetype="dashed")
+
+ggplotly(nl_sp)
+```
+
+Comparando as medianas da *soma de usuarios mensais* dos dois grupos (linha pontilhada azul), em termos absolutos, as linguagens mais antigas sao mais populares. Seja talvez pelo fato de que sao conhecidas pela ampla maioria dos programadores, ou porque sao bastante utilizadas juntamento com frameworks modernos.
+
+Vale notar que esse grupo de linguagens mais antigas nao inclui nenhuma linguagem que caiu no desuso, como cobol.
+
+#### 1.2.Bootstrap
+
+*Utilizando bootstrap:* Inferencia da popularidade de linguagens mais antigas para a populacao
+```{r echo=TRUE}
+set.seed(1)
+
+old_languages <- programming_languages_sorted %>% 
+  filter(file_extension %in% c('java', 'c', 'sql'))
+
+funcao_bootstrap <- function(dado, indices){
+    d = dado %>% 
+        slice(indices) %>%
+        pull(users)        
+    return(median(d))
+}
+
+bootstraps <- boot(data = old_languages, 
+                   statistic = funcao_bootstrap, # <- referencia para a funcao
+                   R = 2000) # numero de bootstraps
+
+boot.ci(bootstraps, conf = 0.95, type = "basic")
+```
+
+*Utilizando bootstrap:* Inferencia da popularidade de linguagens mais recentes para a populacao
+```{r echo=TRUE}
+new_languages <- programming_languages_sorted %>% 
+  filter(file_extension %in% c('go', 'ts', 'swift'))
+
+bootstraps <- boot(data = new_languages, 
+                   statistic = funcao_bootstrap, # <- referencia para a funcao
+                   R = 2000) # numero de bootstraps
+
+boot.ci(bootstraps, conf = 0.95, type = "basic")
+```
+Como os intervalos sao disjuntos, podemos concluir com 95% de confianca que as linguagens mais antigas tem maior popularidade que as mais recentes.
+
+### 2. Os usuarios do git produzem mais documentacao durante a semana ou o fim de semana?
+
+#### Serao considerados como documentacao as seguintes extensoes: *rm, txt e pdf*
+
+*Utilizando bootstrap:* Documentacao nos dias uteis
+```{r echo=TRUE}
+doc_weekdays <- programming_languages_sorted %>% 
+  filter(file_extension %in% c('java', 'c', 'sql')) %>% 
+  mutate(date_formated = paste(the_year, the_month, month_day, sep="-")) %>% 
+  mutate(is_weekend = is.weekend(date_formated)) %>% 
+  filter( is_weekend == FALSE)
+
+bootstraps <- boot(data = doc_weekdays, 
+                   statistic = funcao_bootstrap, # <- referencia para a funcao
+                   R = 2000) # numero de bootstraps
+
+boot.ci(bootstraps, conf = 0.95, type = "basic")
+```
+
+*Utilizando bootstrap:* Documentacao nos finais de semana
+```{r echo=TRUE}
+doc_weekends <- programming_languages_sorted %>% 
+  filter(file_extension %in% c('java', 'c', 'sql')) %>% 
+  mutate(date_formated = paste(the_year, the_month, month_day, sep="-")) %>% 
+  mutate(is_weekend = is.weekend(date_formated)) %>% 
+  filter( is_weekend == TRUE)
+
+bootstraps <- boot(data = doc_weekends, 
+                   statistic = funcao_bootstrap, # <- referencia para a funcao
+                   R = 2000) # numero de bootstraps
+
+boot.ci(bootstraps, conf = 0.95, type = "basic")
 
 ```
+Como os intervalos sao disjuntos, podemos concluir com 95% de confianca que as programadores produzem mais documentacao nos dias de semana.

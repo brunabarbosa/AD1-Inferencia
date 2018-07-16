@@ -94,7 +94,7 @@ nl_sp <- ggplot(new_languages, aes(x = the_month,y = monthly_users, color = year
 ggplotly(nl_sp)
 ```
 
-Comparando as medianas da *soma de usuarios mensais* dos dois grupos (linha pontilhada azul), em termos absolutos, as linguagens mais antigas sao mais populares. Seja talvez pelo fato de que sao conhecidas pela ampla maioria dos programadores, ou porque sao bastante utilizadas juntamento com frameworks modernos.
+Comparando as medianas da *soma de usuarios mensais* dos dois grupos (linha pontilhada azul), em termos absolutos, as linguagens mais antigas sao mais populares. Seja talvez pelo fato de que sao conhecidas pela ampla maioria dos programadores, ou porque sao bastante utilizadas juntamente com frameworks modernos.
 
 Vale notar que esse grupo de linguagens mais antigas nao inclui nenhuma linguagem que caiu no desuso, como cobol.
 

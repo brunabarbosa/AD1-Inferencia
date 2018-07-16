@@ -6,7 +6,8 @@ output:
     df_print: paged
 ---
 
-### 1.Dados
+> #### 1.Importa os dados
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
 library(tidyverse)
@@ -49,12 +50,13 @@ programming_languages_sorted <- programming_languages_sorted %>%
   mutate(date_formated = paste(the_year, the_month, month_day, sep="-"))
 
 ```
-### 1. Linguagens mais recentes sao mais populares do que linguagens mais antigas?
+> #### 1. Linguagens mais recentes sao mais populares do que linguagens mais antigas?
 
   Nesta analise utilizaremos 2 grupos que contem 3 linguagens cada, o primeiro grupo com linguagens dos anos 90 e outro com linguagens que surgiram apartir do ano 2000.
   
-#### GRUPO 1 [1970-1990]: *java, c e sql*
-#### GRUPO 2 [2000-2018]: *go, typescript e swift*
+###### GRUPO 1 [1970-1990]: *java, c e sql*
+###### GRUPO 2 [2000-2018]: *go, typescript e swift*
+
 
 #### 1.1 Popularidade de linguagens na amostra
 
@@ -119,6 +121,7 @@ bootstraps <- boot(data = old_languages,
 boot.ci(bootstraps, conf = 0.95, type = "basic")
 ```
 
+
 *Utilizando bootstrap:* Inferencia da popularidade de linguagens mais recentes para a populacao
 ```{r echo=TRUE}
 new_languages <- programming_languages_sorted %>% 
@@ -132,7 +135,7 @@ boot.ci(bootstraps, conf = 0.95, type = "basic")
 ```
 Como os intervalos sao disjuntos, podemos concluir com 95% de confianca que as linguagens mais antigas tem maior popularidade que as mais recentes.
 
-### 2. Os usuarios do git produzem mais documentacao durante a semana ou o fim de semana?
+> #### 2. Os usuarios do git produzem mais documentacao durante a semana ou o fim de semana?
 
 #### Serao considerados como documentacao as seguintes extensoes: *rm, txt e pdf*
 
@@ -166,4 +169,5 @@ bootstraps <- boot(data = doc_weekends,
 boot.ci(bootstraps, conf = 0.95, type = "basic")
 
 ```
+
 Como os intervalos sao disjuntos, podemos concluir com 95% de confianca que as programadores produzem mais documentacao nos dias de semana.

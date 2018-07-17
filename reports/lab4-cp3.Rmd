@@ -34,13 +34,13 @@ users_data_from_github = read_csv(here("data/github-users-committing-filetypes.c
                       users = col_integer()
                     ))
 
-non_programming_languages <- c("pdf", "md", "html", "txt", "json", "xml", "css", "yml", "scss", "jpg",
-                   "lock", "png", "gradle", "config", "ico", "gif", "svg", "csproj", "rst",
-                   "map", "ttf", "yaml", "pbxproj", "less", "woff", "eot")
+#non_programming_languages <- c("pdf", "md", "html", "txt", "json", "xml", "css", "yml", "scss", "jpg",
+#                   "lock", "png", "gradle", "config", "ico", "gif", "svg", "csproj", "rst",
+#                   "map", "ttf", "yaml", "pbxproj", "less", "woff", "eot")
 
-programming_languages <- subset(users_data_from_github, !(file_extension %in% non_programming_languages))
+#programming_languages <- subset(users_data_from_github, !(file_extension %in% non_programming_languages))
 
-programming_languages_sorted <- programming_languages %>% 
+programming_languages_sorted <- users_data_from_github %>% 
   arrange(file_extension, the_year, the_month, month_day)
 
 ##Linguagens de programacao
@@ -83,6 +83,18 @@ ol_sp <- ggplot(old_languages, aes(x = the_month,y = monthly_users, color = year
 ggplotly(ol_sp)
 ```
 
+No grafico abaixo podemos notar que os dados da amostra tambem sao enviesados para a direita ou esquerda.
+```{r echo=TRUE}
+old_languages <- programming_languages_sorted %>% 
+  filter(file_extension %in% c('java', 'c', 'sql'))
+
+old_languages %>% 
+  ggplot(aes(x = users)) +
+  stat_density(aes(group = file_extension, color = "#315b7d"),position="identity",geom="line") +
+  facet_wrap(~ file_extension) + 
+  ggtitle("Densidade na Amostra - Linguagens mais antigas")
+```
+
 ```{r}
 year <- as.factor(new_languages$the_year)
 nl_sp <- ggplot(new_languages, aes(x = the_month,y = monthly_users, color = year)) +
@@ -93,6 +105,20 @@ nl_sp <- ggplot(new_languages, aes(x = the_month,y = monthly_users, color = year
 
 ggplotly(nl_sp)
 ```
+
+
+No grafico abaixo podemos notar que os dados da amostra tambem sao enviesados para a direita ou esquerda.
+```{r echo=TRUE}
+new_languages <- programming_languages_sorted %>% 
+  filter(file_extension %in% c('go', 'ts', 'swift'))
+
+new_languages %>% 
+  ggplot(aes(x = users)) +
+  stat_density(aes(group = file_extension, color = "#315b7d"),position="identity",geom="line") +
+  facet_wrap(~ file_extension) + 
+  ggtitle("Densidade na Amostra - Linguagens mais recentes")
+```
+
 
 Comparando as medianas da *soma de usuarios mensais* dos dois grupos (linha pontilhada azul), em termos absolutos, as linguagens mais antigas sao mais populares. Seja talvez pelo fato de que sao conhecidas pela ampla maioria dos programadores, ou porque sao bastante utilizadas juntamente com frameworks modernos.
 
@@ -142,7 +168,7 @@ Como os intervalos sao disjuntos, podemos concluir com 95% de confianca que as l
 *Utilizando bootstrap:* Documentacao nos dias uteis
 ```{r echo=TRUE}
 doc_weekdays <- programming_languages_sorted %>% 
-  filter(file_extension %in% c('java', 'c', 'sql')) %>% 
+  filter(file_extension %in% c('rm', 'txt', 'pdf')) %>% 
   mutate(date_formated = paste(the_year, the_month, month_day, sep="-")) %>% 
   mutate(is_weekend = is.weekend(date_formated)) %>% 
   filter( is_weekend == FALSE)
@@ -157,7 +183,7 @@ boot.ci(bootstraps, conf = 0.95, type = "basic")
 *Utilizando bootstrap:* Documentacao nos finais de semana
 ```{r echo=TRUE}
 doc_weekends <- programming_languages_sorted %>% 
-  filter(file_extension %in% c('java', 'c', 'sql')) %>% 
+  filter(file_extension %in% c('rm', 'txt', 'pdf')) %>% 
   mutate(date_formated = paste(the_year, the_month, month_day, sep="-")) %>% 
   mutate(is_weekend = is.weekend(date_formated)) %>% 
   filter( is_weekend == TRUE)

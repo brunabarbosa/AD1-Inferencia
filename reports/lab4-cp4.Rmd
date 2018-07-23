@@ -13,12 +13,15 @@ library(tidyverse)
 library(here)
 library(plotly)
 library(chron)
+library(resample) 
 
 theme_set(theme_bw())
 ```
 
 
-```{r echo=TRUE, message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, include=TRUE}
+set.seed(0)
+
 users_data_from_github = read_csv(here("data/github-users-committing-filetypes.csv"),
                 col_types = cols(
                       .default = col_double(),
@@ -29,42 +32,39 @@ users_data_from_github = read_csv(here("data/github-users-committing-filetypes.c
                       users = col_integer()
                     ))
 
-#non_programming_languages <- c("pdf", "md", "html", "txt", "json", "xml", "css", "yml", "scss", "jpg",
-#                   "lock", "png", "gradle", "config", "ico", "gif", "svg", "csproj", "rst",
-#                   "map", "ttf", "yaml", "pbxproj", "less", "woff", "eot")
-
-#programming_languages <- subset(users_data_from_github, !(file_extension %in% non_programming_languages))
-
 programming_languages_sorted <- users_data_from_github %>% 
   arrange(file_extension, the_year, the_month, month_day)
 
-##Linguagens de programacao
-unique(programming_languages_sorted$file_extension)
-
 programming_languages_sorted <- programming_languages_sorted %>% 
   mutate(date_formated = paste(the_year, the_month, month_day, sep="-"))
-
 ```
 
-#### 1. Linguagens mais recentes sao mais populares do que linguagens mais antigas?
+#### 1.Teste de Hipóteses
 
   Nesta analise utilizaremos 2 grupos que contem 3 linguagens cada, o primeiro grupo com linguagens dos anos 90 e outro com linguagens que surgiram apartir do ano 2000.
   
 ###### GRUPO 1 [1970-1990]: *java, c e sql*
 ###### GRUPO 2 [2000-2018]: *go, typescript e swift*
 
+###### H0: *As linguangens mais antigas sao tao populares quanto as linguagens mais recentes*
+###### H1: *As linguangens mais antigas nao sao tao populares quanto as linguagens mais recentes*
+
 ```{r}
+older_languages <- programming_languages_sorted %>% 
+                filter(file_extension %in% c('java', 'c', 'sql')) %>% 
+                select(users)
 
-old_languages <- programming_languages_sorted %>% 
-                filter(file_extension %in% c('java', 'c', 'sql'))
+older_languages$group = "a"
 
-new_languages <- programming_languages_sorted %>% 
-                filter(file_extension %in% c('go', 'ts', 'swift'))
+newer_languages <- programming_languages_sorted %>% 
+                filter(file_extension %in% c('go', 'ts', 'swift')) %>% 
+                select(users)
 
-set.seed(0)
+newer_languages$group = "b"
 
+users_by_laguage <- rbind(older_languages, newer_languages)
 
-t.test(old_languages$users, new_languages$users, var.equal = TRUE)
+permutationTest2(users_by_laguage, mean(users), treatment = group)
 ```
 
 #### 2. Os usuarios do git produzem mais documentacao durante a semana ou o fim de semana?
@@ -79,13 +79,34 @@ doc_weekdays <- programming_languages_sorted %>%
   mutate(is_weekend = is.weekend(date_formated)) %>% 
   filter( is_weekend == FALSE)
 
+doc_weekdays <- doc_weekdays %>% 
+  select(users)
+
+doc_weekdays$group <- "a"
+
 doc_weekends <- programming_languages_sorted %>% 
   filter(file_extension %in% c('rm', 'txt', 'pdf')) %>% 
   mutate(date_formated = paste(the_year, the_month, month_day, sep="-")) %>% 
   mutate(is_weekend = is.weekend(date_formated)) %>% 
   filter( is_weekend == TRUE)
 
-t.test(doc_weekdays$users, doc_weekends$users, var.equal = TRUE)
+doc_weekends <- doc_weekends %>% 
+  select(users)
 
+doc_weekends$group <- "b"
 
+doc_by_day <- rbind(doc_weekdays, doc_weekends)
+
+permutationTest2(doc_by_day, mean(users), treatment = group)
 ```
+
+
+
+
+
+
+
+
+
+
+
